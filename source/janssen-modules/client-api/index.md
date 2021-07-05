@@ -37,7 +37,7 @@ registration so that oxd can automatically synchronize with the client data from
 OP whenever required. Check [Register site](./api/index.md#register-site) for
 more details.
 
-![jans-client-api-https-architecture](./images/jans_client_api_overview_diagram.png)
+![jans-client-api-https-architecture](images/jans_client_api_overview_diagram.png)
 
 ## Get Started
 
