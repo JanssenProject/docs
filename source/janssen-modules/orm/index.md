@@ -16,10 +16,17 @@
 
 This is the library for persistence and caching implemenations in Janssen. Currently LDAP and Couchbase are supported. RDBMS is coming soon.
 
-<!--
+
 ## API Reference
 
 ## Code Reference
+
+### Code structure and packages
+Following are major packages in jans-orm:
+- annotation : provides custom annotations which consumers of `jans-orm` can use to denote persistent entities and attributes.
+- 
+
+<!--
 
 ## Deployment
 
