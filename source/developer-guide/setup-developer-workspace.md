@@ -1,24 +1,28 @@
-# Setup Developer Workspace for Janssen
+Setup Persistance Store# Setup Developer Workspace for Janssen
+
+This is a step-by-step guide to setup developer workspace for Janssen server on Ubuntu based system. Instructions for Windows based system can be found [here](TODO). 
+
+Using this workspace, developers can implement code changes, deploy and test locally within development environment. 
 
 - [Prerequisites](#prerequisites)
 - [Get Code and Build](#get-code-and-build)
 - [Configure Jetty](#configure-jetty)
-- [Setup JSON Web Keys](#setup-JSON-web-keys)
-- [Setup data store](#setup-data-store)
-- [Configure workspace](#configure-workspace)
+- [Setup JSON Web Keys](#setup-json-web-keys)
+- [Setup Persistance Store](#setup-persistance-store)
+- [Configure Properties](#configure-properties)
 - [Start Janssen Auth Server](#start-janssen-auth-server)
 
 ## Prerequisites
 
 #### IDE
 
-This guide uses IntellijIdea Java IDE to setup workspace. Any other IDE can be used to perform steps mentioned in this guide. IDE should support JDK version 11 or later in order to support Janssen development. Refer to Janssen documentation to find out current JDK version required by Janssen.
+This guide uses IntellijIdea Java IDE to setup workspace. Other IDEs, like Eclipse, can also be used to perform steps mentioned in this guide. IDE should support Java version 11. Refer to Janssen documentation to find out current JDK version required by Janssen.
 
 #### MySQL
 
 Janssen needs persistance storage to store configuration and transactional data.
 Janssen supports variety of persistance technologies including LDAP, RDBMS and cloud storage.
-For this guide, we are going to use MySQL relational database as our persistance store. On a Ubuntu system, you can install MySql using command below:
+For this guide, we are going to use MySQL relational database as our persistance store. You can install MySql on Ubuntu using command below:
 
 ```
 sudo apt-get install mysql-server
@@ -26,20 +30,20 @@ sudo apt-get install mysql-server
 
 ## Get Code and Build
 
-- open intellij and create a `new project from version control` using [Github repo](https://github.com/JanssenProject/jans-auth-server) for `jans-auth-server`
-- Now we can build the project using Idea's `run/debug configurations`. 
-  - Create a new `maven` configuration named `jans-auth-server-parent` and give command line as `clean install` and under `Java options` make sure that JDK-11 (any distribution) is selected. If not the you may have to install and configure JDK-11 here. Jans prefers Amazon Corretto distribution. Also, add `skip tests` option by clicking `modify` on `java options`.
+- Open IntellijIdea and create a new project from version control using [Github repo](https://github.com/JanssenProject/jans-auth-server) for `jans-auth-server`
 
-- Assign host name to your local IP address by adding below entry in `/etc/hosts` file
+- Build the project using Idea's `run/debug configurations` dialogue. 
+  - Create a new `maven` configuration named `jans-auth-server-parent` 
+  - Give command line as `clean install` 
+  - Under `Java options` make sure that JDK-11 is selected 
+  - Add `skip tests` option by clicking `modify` on `java options`
+  - `Save` configuration
 
-	```
-	127.0.0.1       test.local.jans.io
-	```
-Here, `test.local.jans.io` can be any name of your choice. We will refer to `test.local.jans.io` as our host name for rest of this guide.
+Running this configuration will build and install `jans-auth-server` project.
 
 ## Configure Jetty
 
-Janssen uses Jetty to run application service. For the purpose of development Janssen uses Jetty Maven plug-in for quick deployments and testing. This plug-in is already a part of project dependencies, so developers do not need to add separately. Following steps will configure Jetty Maven plug-in to deploy Janssen.
+Janssen uses Jetty to run application service. For the purpose of development Janssen uses Jetty Maven plug-in for quick deployment and testing. This plug-in is already a part of project dependencies, so developers do not need to add or install separately. Following steps will configure Jetty Maven plug-in for Janssen deployment.
 
 ### Download Jetty configuration xml files 
 
@@ -58,23 +62,10 @@ and put these files under
 jans-auth-server/server/src/main/webapp-jetty/WEB-INF
 ```
 
-### Configure Jetty for HTTPS
-
-To configure Jetty to work with HTTPS, we have to setup certificate. We will use Java keytool to generate key pair as given below.
-    
-```
-keytool -genkeypair -alias jetty -keyalg EC -groupname secp256r1 -keypass secret -validity 3700 -storetype JKS -keystore keystore.test.local.jans.io.jks -storepass <password-of-choice>
-```
-
-Above command will create a `.jks` file in the same directory from where you have executed the command. Copy this keystore file to  
-```
-jans-auth-server/server/src/main/webapp-jetty/WEB-INF
-```
-
-- update `jans-auth-server/server/pom.xml` with `<jettyXml>` and `contextPath` elements under `jetty-mave-plugin` as shown in section below:
+- Update `<jettyXml>` and `<contextPath>` elements of `jetty-mave-plugin` under `jans-auth-server/server/pom.xml` as shown in section below:
 
   ```
-  			<plugin>
+  		<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>9.4.31.v20200723</version>
@@ -90,8 +81,31 @@ jans-auth-server/server/src/main/webapp-jetty/WEB-INF
 			</plugin>
   ```
 
-- update `jans-auth-server/server/src/main/webapp-jetty/WEB-INF/jetty-ssl-context.xml`
-- update following properties as mentioned below:
+#### Assign Host Name
+
+Assign Host Name to your local IP address by adding below entry in `/etc/hosts` file
+
+	```
+	127.0.0.1       test.local.jans.io
+	```
+Here, `test.local.jans.io` can be any name of your choice. We will refer to `test.local.jans.io` as our host name for rest of this guide.
+
+### Configure Jetty for HTTPS
+
+To configure Jetty to work with HTTPS, we have to setup a certificate. We will use Java keytool to generate key pair as given below.
+    
+```
+keytool -genkeypair -alias jetty -keyalg EC -groupname secp256r1 -keypass secret -validity 3700 -storetype JKS -keystore keystore.test.local.jans.io.jks -storepass <password-of-choice>
+```
+
+Above command will create a `.jks` file in the same directory from where you have executed the command. Copy this keystore file to path:
+
+```
+jans-auth-server/server/src/main/webapp-jetty/WEB-INF
+```
+
+Update following properties in `jans-auth-server/server/src/main/webapp-jetty/WEB-INF/jetty-ssl-context.xml` after making appropriate replacements:
+  
   ```
   <Set name="KeyStorePath">src/main/webapp-jetty/WEB-INF/keystore.test.local.jans.io.jks</Set>
   <Set name="KeyStorePassword">{replace with your keystore password}</Set>
@@ -99,7 +113,6 @@ jans-auth-server/server/src/main/webapp-jetty/WEB-INF
   <Set name="TrustStorePath">src/main/webapp-jetty/WEB-INF/keystore.test.local.jans.io.jks</Set>
   <Set name="TrustStorePassword">{replace with your keystore password}</Set>
   ```
-
 
 ## Setup JSON Web Keys
 
@@ -116,7 +129,7 @@ jans-auth-server/server/src/main/webapp-jetty/WEB-INF
      ```
 	   java -Dlog4j.defaultInitOverride=true -cp /tmp/jans-auth-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar io.jans.as.client.util.KeyGenerator -keystore './keystore.test.local.jans.io.jks' -keypasswd secret -sig_keys RS256 RS384 RS512 ES256 ES384 ES512 -enc_keys RS256 RS384 RS512 ES256 ES384 ES512 -dnname 'CN=Jans Auth CA Certificates' -expiration 365 > /tmp/keys/keys_client_keystore.json
      ```
-- Move `keystore.test.local.jans.io.jks` file created above to `/etc/certs` and rename it to `jans-auth-keys.jks`. At a later stage, we will point Janssen to look for certificates under `/etc/certs`.
+- Move `keystore.test.local.jans.io.jks` file created above to `/etc/certs` and rename it to `jans-auth-keys.jks`. This file will be used at a later stage when we point Janssen server to look for certificates under `/etc/certs`.
 
 ## Setup Persistance Store
 
@@ -124,7 +137,7 @@ Janssen uses persistance storage to hold configuration and transactional data.
 Janssen supports variety of persistance mechanisms including LDAP, RDBMS and cloud storage.
 For this guide, we are going to use MySQL relational database as a persistance store. 
 
-As a first step, let's create a schema and a user.
+As a first step, let's create a schema and a user for Janssen server.
 
 - Log into MySQL
 
@@ -132,34 +145,38 @@ As a first step, let's create a schema and a user.
   sudo mysql
   ```
   
-- Create new database(schema) for Janssen
+- Create new schema `jansdb`
 
   ```
   mysql> CREATE DATABASE jansdb;
   ```
   
-- Create new db user 
+- Create new db user `jans`
+
   ```
   CREATE USER 'jans'@'localhost' IDENTIFIED BY 'PassOfYourChoice';
   ```
-- Grant privileges to new user on `jansdb` schema 
+  
+- Grant privileges 
+
   ```
   GRANT ALL PRIVILEGES ON jansdb.* TO 'jans'@'localhost';
   ```
+  
 - Exit MySQL login 
 
 ### Load Initial Data Set
 
-Next, we will load basic configuration and test data into MySQL via a data import script. Janssen modules require configuration data
+We will load basic configuration and test data into MySQL via data import script. Janssen modules require configuration data
  at the time of start up and test data is needed to run integration tests. 
 
 ```
 TODO:
 Add link to script below. This script is essentially export of entire Janssen schema including test data.
-Generation of this script needs to be automated. Plan is to have Jenkins build create this data dump
-script after every successful installtion on integration servers. Similar mechanism has be to established
-for other persistence types like LDAP, Spanner etc. Once this script is generated, it has to be made available
-via a link (hosted servers or stored in GH repo)
+Generation of this script needs to be automated. One way to do this is to have Jenkins build create 
+this data dumpscript after every successful installtion on integration servers. Once this script is 
+generated, it has to be made available via a link (hosted servers or stored in GH repo). Similar 
+mechanism has be to established for other persistence types like LDAP, Spanner etc. 
 ```
 
 [Download](TODO add link here) data import script. This script is a generic script and we have to edit certain values as per our local setup as described in steps below.
@@ -181,7 +198,9 @@ Replace 'testmysql.dd.jans.io' above with actual host name from final script
 
 - Search for string `keyStoreSecret` in the script and replace corresponding value with secret you used while creating keystore in [configuration](#configure-jetty-for-https) step.
 
-- Import data load script into your local MySQL
+#### Import data
+
+Use data load script to populate `jansdb` schema
 
   ```
   sudo mysql -u root -p jansdb < jansdb_dump.sql;
