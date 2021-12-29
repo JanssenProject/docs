@@ -26,16 +26,15 @@ sudo apt-get install mysql-server
 
 ## Get Code and Build
 
-- open intellij and create a `new project from version control` using code URL of Github repo
-```
-https://github.com/JanssenProject/jans-auth-server
-```
-- Now we can build the project using Idea's `run/debug configurations`. Create a new `maven` configuration named `jans-auth-server-parent` and give command line as `clean install` and under `Java options` make sure that JDK-11 (any distribution) is selected. If not the you may have to install and configure JDK-11 here. Jans prefers Amazon Corretto distribution. Also, add `skip tests` option by clicking `modify` on `java options`.
+- open intellij and create a `new project from version control` using [Github repo](https://github.com/JanssenProject/jans-auth-server) for `jans-auth-server`
+- Now we can build the project using Idea's `run/debug configurations`. 
+  - Create a new `maven` configuration named `jans-auth-server-parent` and give command line as `clean install` and under `Java options` make sure that JDK-11 (any distribution) is selected. If not the you may have to install and configure JDK-11 here. Jans prefers Amazon Corretto distribution. Also, add `skip tests` option by clicking `modify` on `java options`.
 
-- Set host name: For Janssen modules to work correctly, you need to assign a host name to your local machine's IP. localhost is not supported. To do this, we need to make changes to hosts file. On Ubuntu and other Linux destributions, this file is /etc/hosts, while for Windows same file can be found at C:\Windows\System32\drivers\etc\hosts. Make an entry similar to below in hosts file:
-```
-127.0.0.1       test.local.jans.io
-```
+- Assign host name to your local IP address by adding below entry in `/etc/hosts` file
+
+	```
+	127.0.0.1       test.local.jans.io
+	```
 Here, `test.local.jans.io` can be any name of your choice. We will refer to `test.local.jans.io` as our host name for rest of this guide.
 
 ## Configure Jetty:
@@ -45,15 +44,16 @@ Janssen uses Jetty to run application service. For the purpose of development Ja
 ### Download Jetty configuration xml files 
 
 Download files listed below. Files will be required by Jetty to enable ssl and other configuration:
-- jetty.xml: https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty.xml
-- jetty-http.xml: https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-http.xml
-- jetty-ssl.xml: https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-ssl.xml 
-- jetty-ssl-context.xml: https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-ssl-context.xml
-- jetty-https.xml: https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-https.xml
+- [jetty.xml](https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty.xml)
+- [jetty-http.xml](https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-http.xml)
+- [jetty-ssl.xml](https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-ssl.xml)
+- [jetty-ssl-context.xml](https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-ssl-context.xml)
+- [jetty-https.xml](https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-https.xml)
 
 (or you can get same files from a downloaded Jetty distribution from `<jetty-home>/etc`)
 
-and put these files in
+and put these files under
+
 ```
 jans-auth-server/server/src/main/webapp-jetty/WEB-INF
 ```
@@ -71,7 +71,7 @@ Above command will create a `.jks` file in the same directory from where you hav
 jans-auth-server/server/src/main/webapp-jetty/WEB-INF
 ```
 
-- update `/home/dhaval/IdeaProjects/others/jans-auth-server/server/pom.xml` with `<jettyXml>` and `contextPath` elements under `jetty-mave-plugin` as section below:
+- update `jans-auth-server/server/pom.xml` with `<jettyXml>` and `contextPath` elements under `jetty-mave-plugin` as shown in section below:
 
   ```
   			<plugin>
@@ -90,8 +90,8 @@ jans-auth-server/server/src/main/webapp-jetty/WEB-INF
 			</plugin>
   ```
 
-- update `src/main/webapp-jetty/WEB-INF/jetty-ssl-context.xml`
-  update following properties as mentioned below:
+- update `jans-auth-server/server/src/main/webapp-jetty/WEB-INF/jetty-ssl-context.xml`
+- update following properties as mentioned below:
   ```
   <Set name="KeyStorePath">src/main/webapp-jetty/WEB-INF/keystore.test.local.jans.io.jks</Set>
   <Set name="KeyStorePassword">{replace with your keystore password}</Set>
@@ -111,16 +111,12 @@ jans-auth-server/server/src/main/webapp-jetty/WEB-INF
 
 - Generate JWT
 
-   - download `jans-auth-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar` from `https://maven.jans.io/maven/io/jans/jans-auth-client/1.0.0-SNAPSHOT/` to `/tmp/`
-   - now run 
-   
-   ```
-   java -Dlog4j.defaultInitOverride=true -cp /tmp/jans-auth-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar io.jans.as.client.util.KeyGenerator -keystore './keystore.test.local.jans.io.jks' -keypasswd secret -sig_keys RS256 RS384 RS512 ES256 ES384 ES512 -enc_keys RS256 RS384 RS512 ES256 ES384 ES512 -dnname 'CN=Jans Auth CA Certificates' -expiration 365 > /tmp/keys/keys_client_keystore.json
-   ```
-   
-   This command adds additional keys in `keystore.test.local.jans.io.jks` and creates a JSON file with web keys. We will use web keys files later to update in our persistent store.
-
-- At a later stage, we will point Janssen to look for certificates under `/etc/certs`. So move `keystore.test.local.jans.io.jks` file to `/etc/certs` and rename it to `jans-auth-keys.jks`.
+   - To generate JWT, we will use a utility Jar file. Download this file from [here](https://maven.jans.io/maven/io/jans/jans-auth-client/1.0.0-SNAPSHOT/)
+   - now run command as given below. This command adds additional keys in `keystore.test.local.jans.io.jks` and creates a JSON file with web keys. We will use web keys files later to update in our persistence store.
+     ```
+	   java -Dlog4j.defaultInitOverride=true -cp /tmp/jans-auth-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar io.jans.as.client.util.KeyGenerator -keystore './keystore.test.local.jans.io.jks' -keypasswd secret -sig_keys RS256 RS384 RS512 ES256 ES384 ES512 -enc_keys RS256 RS384 RS512 ES256 ES384 ES512 -dnname 'CN=Jans Auth CA Certificates' -expiration 365 > /tmp/keys/keys_client_keystore.json
+     ```
+- Move `keystore.test.local.jans.io.jks` file created above to `/etc/certs` and rename it to `jans-auth-keys.jks`. At a later stage, we will point Janssen to look for certificates under `/etc/certs`.
 
 ## Setup Persistance Store
 
@@ -154,18 +150,17 @@ As a first step, let's create a schema and a user.
 
 ### Load Initial Data Set
 
-Next, we will load basic configuration data into MySQL. This data is required
-by Janssen modules at the time of start up. This data set also contains test data set to help us run integration tests. We will use a helper script that will create required tables and also insert basic configuration and test data.
+Next, we will load basic configuration and test data into MySQL. Janssen modules require configuration data
+ at the time of start up and test data is needed to run integration tests. 
 
-- Get MySQL database data import script file from [here](TODO add link here). This 
-script is a data dump which can be directly loaded into local MySQL database. This script is a generic script and we have to edit certain values as per our local setup as described in steps below.
+- [Download](TODO add link here) data import script. This script is a generic script and we have to edit certain values as per our local setup as described in steps below.
 
 #### Update hostname
 we need to replace generic host name in the script with the one that we have set for our local environment, which is `test.local.jans.io`. To do that, open script in a text editor and
   
-      ```
-      TODO replace `testmysql.dd.jans.io` with actual host name from final script in steps below
-      ```
+      
+      `TODO` replace 'testmysql.dd.jans.io' with actual host name from final script in steps below
+      
   -   replace string `https://testmysql.dd.jans.io` with `https://test.local.jans.io:8443` 
 
   -   replace string `testmysql.dd.jans.io` with `test.local.jans.io`
@@ -244,8 +239,11 @@ In our code base, under `server/conf` directory, we have two property files, `ja
 Now we are ready to run the app.
 
 ### Using Maven
+
+Run below maven command from root of `server` module
+
 ```
-dhaval@thinkpad:~/IdeaProjects/others/jans-auth-server/server$ mvn -DskipTests -Djans.base=./target -Dlog.base=/home/dhaval/temp/logs/jans-logs jetty:run-war
+mvn -DskipTests -Djans.base=./target -Dlog.base=/home/dhaval/temp/logs/jans-logs jetty:run-war
 ```
 
 ### Using Idea run configuration
@@ -258,10 +256,8 @@ dhaval@thinkpad:~/IdeaProjects/others/jans-auth-server/server$ mvn -DskipTests -
    -Djans.base=./target -Dlog.base=<dir-for-logs>
    ```
 
-- access `http://test.local.jans.io:8080/jans-auth/.well-known/openid-configuration`
-- for https: `https://test.local.jans.io:8443/jans-auth/.well-known/openid-configuration`
-- access `http://test.local.jans.io:8080/jans-auth/restv1/userinfo` (expect to get error JSON due to missing params)
-- access `http://test.local.jans.io:8080/jans-auth/restv1/clientinfo` (expect to get error JSON due to missing params)
+You can varify if the server is up by accessing: `https://test.local.jans.io:8443/jans-auth/.well-known/openid-configuration`
+
 
 ## Steps:
   - [Setup workspace](https://gist.github.com/ossdhaval/c0c82e437dcb5d5403f241e81908ec4c)	
