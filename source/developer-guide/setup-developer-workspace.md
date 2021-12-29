@@ -37,7 +37,7 @@ sudo apt-get install mysql-server
 	```
 Here, `test.local.jans.io` can be any name of your choice. We will refer to `test.local.jans.io` as our host name for rest of this guide.
 
-## Configure Jetty:
+## Configure Jetty
 
 Janssen uses Jetty to run application service. For the purpose of development Janssen uses Jetty Maven plug-in for quick deployments and testing. This plug-in is already a part of project dependencies, so developers do not need to add separately. Following steps will configure Jetty Maven plug-in to deploy Janssen.
 
@@ -153,18 +153,25 @@ As a first step, let's create a schema and a user.
 Next, we will load basic configuration and test data into MySQL. Janssen modules require configuration data
  at the time of start up and test data is needed to run integration tests. 
 
+```
+TODO:
+Add link to script below. This script is essentially export of entire Janssen schema including test data. Generation of this script needs to be automated. Plan is to have Jenkins build create this data dump script after every successful installtion on integration servers. Similar mechanism has be to established for other persistence types like LDAP, Spanner etc. Once this script is generated, it has to be made available via a link (hosted servers or stored in GH repo)
+```
+
 [Download](TODO add link here) data import script. This script is a generic script and we have to edit certain values as per our local setup as described in steps below.
 
 #### Update hostname
-we need to replace generic host name in the script with the one that we have set for our local environment, which is `test.local.jans.io`. To do that, open script in a text editor and
-  
-      
- 	`TODO` replace 'testmysql.dd.jans.io' with actual host name from final script in steps below
-      
+we need to replace generic host name in the script with the one that we have set for our local environment. Which is `test.local.jans.io`. 
+To do this, open script in a text editor and perform following replacements.
+        
   -   replace string `https://testmysql.dd.jans.io` with `https://test.local.jans.io:8443` 
-
+  
   -   replace string `testmysql.dd.jans.io` with `test.local.jans.io`
 
+```
+TODO:
+Replace 'testmysql.dd.jans.io' above with actual host name from final script
+```
 
 #### Update keystore secret in database config
 
@@ -181,10 +188,13 @@ we need to replace generic host name in the script with the one that we have set
 Now we need to update JSON web keys in DB with what we have generated during [Setup JSON Web Keys](#setup-json-web-keys).
 
 - login to mysql with user `jans`
+
   ```
   sudo mysql -u jans -p jansdb
   ```
+  
 - Run the update query as below after replacing `JWKs content` with multiline content from `/tmp/keys/keys_client_keystore.json`:
+
   ```
   UPDATE jansdb.jansAppConf SET jansConfWebKeys = 'JWKs content' where doc_id = "jans-auth";
   ```
@@ -196,9 +206,8 @@ At this point, database is ready to support Janssen server.
 Now that we have configured Jetty plug-in and persistent store, we need to update properties files in our code base so that server can connect to persistent store.
 
 Under `jans-auth-server/server/conf`, we have two property files:
-  - `jans.properties`: Holds details like type of persistance to use, localtion of certificates etc.
-  - `jans-sql.properties`: Since we are using MySQL RDBMS persistence store, 
-    details in this file will be used to connect MySQL.
+  - `jans.properties`: Properties like type of persistance to use, localtion of certificates etc.
+  - `jans-sql.properties`: Properties for SQL persistence store
     
 - Update `jans.properties`
   -   edit `persistence.type` to `persistence.type= sql` since we are using MySQL as our backend
@@ -206,15 +215,14 @@ Under `jans-auth-server/server/conf`, we have two property files:
   -   edit value of `jansAuth_ConfigurationEntryDN` to `jansAuth_ConfigurationEntryDN=ou=jans-auth,ou=configuration,o=jans` 
 
 - Update `jans-sql.properties`
-  - Set `db.schema.name` to name of schema that will be used to persist Janssen data. We will name the schema as `jansdb` for this guide. 
+  - Set `db.schema.name` to `jansdb` as our MySql schema
   - Set `connection.uri` to `jdbc:mysql://localhost:3306/jansdb`
   - Set `connection.driver-property.serverTimezone` to `UTC`
-  - Set `auth.userName` to the user that Janssen server will use to access database. For this guide, will name it as `jans`
-  - Set `auth.userPassword` to passwod that you would want for `jans` user
-  - Set `password.encryption.method` to method you have selected to encrypt the password for `userPassword` property. If you are using plain text password for your local setup, comment out this property.
+  - Set `auth.userName` to `jans` as database user
+  - Set `auth.userPassword` to passwod for `jans` db user
+  - Set `password.encryption.method` to method you have selected to encrypt the password for `userPassword` property. For developer setup, since we are using plain text password, comment out this property.
     
-  Properties of `jans-sql.properies` listed above are most likely to be customised as per your local setup. 
-  Other properties from this file can be set to standard values as given below.
+  Other properties from `jans-sql.properies` file can be set to standard values as given below.
 
   ```
   # Connection pool size
@@ -234,7 +242,7 @@ Under `jans-auth-server/server/conf`, we have two property files:
 
 ## Start Janssen Auth Server
 
-Now we are ready to run the app.
+Now we are ready to run Janssen server. You can run this via maven command or by creating run configuration in IntellijIdea.
 
 ### Using Maven
 
@@ -260,8 +268,7 @@ https://test.local.jans.io:8443/jans-auth/.well-known/openid-configuration
 ```
 
 
-## Steps:
-  - [Setup workspace](https://gist.github.com/ossdhaval/c0c82e437dcb5d5403f241e81908ec4c)	
+## Next Steps:
   - [Run unit and integration tests](https://gist.github.com/ossdhaval/f2ca2590cdbe0c11db5d58f87e13479f)
   - [Setup Debugging](https://gist.github.com/ossdhaval/11df8be8ebf9063b2ba18097efb040f9)
   - [Setup IntellijIdea](https://gist.github.com/ossdhaval/36e219c350e1120b31f803695a22e30d)
