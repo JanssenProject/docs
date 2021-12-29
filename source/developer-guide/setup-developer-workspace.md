@@ -153,13 +153,13 @@ As a first step, let's create a schema and a user.
 Next, we will load basic configuration and test data into MySQL. Janssen modules require configuration data
  at the time of start up and test data is needed to run integration tests. 
 
-- [Download](TODO add link here) data import script. This script is a generic script and we have to edit certain values as per our local setup as described in steps below.
+[Download](TODO add link here) data import script. This script is a generic script and we have to edit certain values as per our local setup as described in steps below.
 
 #### Update hostname
 we need to replace generic host name in the script with the one that we have set for our local environment, which is `test.local.jans.io`. To do that, open script in a text editor and
   
       
-      `TODO` replace 'testmysql.dd.jans.io' with actual host name from final script in steps below
+ 	`TODO` replace 'testmysql.dd.jans.io' with actual host name from final script in steps below
       
   -   replace string `https://testmysql.dd.jans.io` with `https://test.local.jans.io:8443` 
 
@@ -168,9 +168,9 @@ we need to replace generic host name in the script with the one that we have set
 
 #### Update keystore secret in database config
 
-- Search for string `keyStoreSecret` in script and replace corresponding value. Here the `<key-store-secret>` is the secret you used while creating keystore in [Setup SSL](#setup-ssl) step.
+- Search for string `keyStoreSecret` in the script and replace corresponding value with secret you used while creating keystore in [configuration](#configure-jetty-for-https) step.
 
-- Script is now ready to be executed. Import data load script into your local MySQL
+- Import data load script into your local MySQL
 
   ```
   sudo mysql -u root -p jansdb < jansdb_dump.sql;
@@ -178,25 +178,24 @@ we need to replace generic host name in the script with the one that we have set
 
 #### Update JSON Web keys in database config
 
-Now we need to update JSON web keys in DB with what we have generated.
+Now we need to update JSON web keys in DB with what we have generated during [Setup JSON Web Keys](#setup-json-web-keys).
 
-- open `/tmp/keys/keys_client_keystore.json` and copy the content
 - login to mysql with user `jans`
   ```
   sudo mysql -u jans -p jansdb
   ```
-- Run the update query as below:
+- Run the update query as below after replacing `JWKs content` with multiline content from `/tmp/keys/keys_client_keystore.json`:
   ```
-  UPDATE jansdb.jansAppConf SET jansConfWebKeys = '<multiline content from keystore json>' where doc_id = "jans-auth";
+  UPDATE jansdb.jansAppConf SET jansConfWebKeys = 'JWKs content' where doc_id = "jans-auth";
   ```
 
 At this point, database is ready to support Janssen server.
 
 ## Configure Properties
 
-Now that we have configured Jetty plug-in and persistent store, we need to update properties files in our code base accordingly.
+Now that we have configured Jetty plug-in and persistent store, we need to update properties files in our code base so that server can connect to persistent store.
 
-In our code base, under `server/conf` directory, we have two property files, `jans.properties` and `jans-sql.properties`.
+Under `jans-auth-server/server/conf`, we have two property files:
   - `jans.properties`: Holds details like type of persistance to use, localtion of certificates etc.
   - `jans-sql.properties`: Since we are using MySQL RDBMS persistence store, 
     details in this file will be used to connect MySQL.
@@ -214,8 +213,8 @@ In our code base, under `server/conf` directory, we have two property files, `ja
   - Set `auth.userPassword` to passwod that you would want for `jans` user
   - Set `password.encryption.method` to method you have selected to encrypt the password for `userPassword` property. If you are using plain text password for your local setup, comment out this property.
     
- Properties of `jans-sql.properies` listed above are most likely to be customised as per your local setup. 
- Other properties from this file can be set to standard values as given below.
+  Properties of `jans-sql.properies` listed above are most likely to be customised as per your local setup. 
+  Other properties from this file can be set to standard values as given below.
 
   ```
   # Connection pool size
@@ -233,7 +232,6 @@ In our code base, under `server/conf` directory, we have two property files, `ja
   connection.pool.min-evictable-idle-time-millis=180000
   ```
 
-
 ## Start Janssen Auth Server
 
 Now we are ready to run the app.
@@ -248,7 +246,7 @@ mvn -DskipTests -Djans.base=./target -Dlog.base=/home/dhaval/temp/logs/jans-logs
 
 ### Using Idea run configuration
 
-- Open Idea's `run/debug configurations` and create a copy of previously created run configuration `jans-auth-server-parent`, and 
+- Open IntellijIdea's `run/debug configurations` dialogue and create a copy of previously created run configuration `jans-auth-server-parent`. And update following: 
   - change working directory to `jans-auth-server` by selecting `jans-auth-server/server`
   - change the `command line` arguments to `jetty:run-war`
   - Add following `VM arguments` to `java options`
@@ -256,7 +254,10 @@ mvn -DskipTests -Djans.base=./target -Dlog.base=/home/dhaval/temp/logs/jans-logs
    -Djans.base=./target -Dlog.base=<dir-for-logs>
    ```
 
-You can varify if the server is up by accessing: `https://test.local.jans.io:8443/jans-auth/.well-known/openid-configuration`
+You can varify if the server is up by accessing: 
+```
+https://test.local.jans.io:8443/jans-auth/.well-known/openid-configuration
+```
 
 
 ## Steps:
