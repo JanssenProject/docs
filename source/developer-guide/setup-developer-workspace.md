@@ -150,12 +150,16 @@ As a first step, let's create a schema and a user.
 
 ### Load Initial Data Set
 
-Next, we will load basic configuration and test data into MySQL. Janssen modules require configuration data
+Next, we will load basic configuration and test data into MySQL via a data import script. Janssen modules require configuration data
  at the time of start up and test data is needed to run integration tests. 
 
 ```
 TODO:
-Add link to script below. This script is essentially export of entire Janssen schema including test data. Generation of this script needs to be automated. Plan is to have Jenkins build create this data dump script after every successful installtion on integration servers. Similar mechanism has be to established for other persistence types like LDAP, Spanner etc. Once this script is generated, it has to be made available via a link (hosted servers or stored in GH repo)
+Add link to script below. This script is essentially export of entire Janssen schema including test data.
+Generation of this script needs to be automated. Plan is to have Jenkins build create this data dump
+script after every successful installtion on integration servers. Similar mechanism has be to established
+for other persistence types like LDAP, Spanner etc. Once this script is generated, it has to be made available
+via a link (hosted servers or stored in GH repo)
 ```
 
 [Download](TODO add link here) data import script. This script is a generic script and we have to edit certain values as per our local setup as described in steps below.
@@ -242,7 +246,7 @@ Under `jans-auth-server/server/conf`, we have two property files:
 
 ## Start Janssen Auth Server
 
-Now we are ready to run Janssen server. You can run this via maven command or by creating run configuration in IntellijIdea.
+Now we are ready to run Janssen server. You can run Janssen auth server via maven command or by creating run configuration in IntellijIdea.
 
 ### Using Maven
 
@@ -258,11 +262,13 @@ mvn -DskipTests -Djans.base=./target -Dlog.base=/home/dhaval/temp/logs/jans-logs
   - change working directory to `jans-auth-server` by selecting `jans-auth-server/server`
   - change the `command line` arguments to `jetty:run-war`
   - Add following `VM arguments` to `java options`
+  
    ```
    -Djans.base=./target -Dlog.base=<dir-for-logs>
    ```
 
 You can varify if the server is up by accessing: 
+
 ```
 https://test.local.jans.io:8443/jans-auth/.well-known/openid-configuration
 ```
