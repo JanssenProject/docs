@@ -30,7 +30,7 @@ Certificates are required in order to run some of the integration tests, for exa
 
 In this step we will give all the essential information about target Janssen server to our local workspace . This is configured in form of `profile`. Steps below will help us create a profile in our local code workspace. 
 
-### Profile for client module
+### Create Profile for client module
 - Under `<auth-server-code-dir>/client/profiles/` create directory named `test.local.jans.io`
 - copy contents of `default` profile to new profile directory 
 - Update following values as per local setup:
@@ -44,13 +44,13 @@ In this step we will give all the essential information about target Janssen ser
 
 - Edit Java files 
   
-  > TODO: this is a hack because we have `jans-auth` as web app context. In actual setup, there is no such context. So, in this setup, we need to have URLs with `jans-auth`. For now we are hard-coding in the code. Ideally, these steps should not be needed.
+  > TODO: This is a hack and will be removed after appropriate configuration. For now we are hard-coding `/jans-auth` context in the code.
   
    - Edit `client/src/test/java/io/jans/as/client/BaseTest.java` where url `/.well-known/openid-configuration` is noted and add `jans-auth` to it so that it becomes `"/jans-auth/.well-known/openid-configuration"`
    - Similarly edit `client/src/main/java/io/jans/as/client/OpenIdConnectDiscoveryClient.java` file where URL `"/.well-known/webfinger"` is mentioned and make it `"/jans-auth/.well-known/webfinger"`
 
 
-### Profile for server module
+### Create Profile for server module
 - Under `<auth-server-code-dir>/server/profiles/` create directory named `test.local.jans.io`
 - copy contents of `default` profile to new profile directory 
 - Edit `config-oxauth.properties`
