@@ -1,59 +1,72 @@
 # Workspace setup for running Janssen server Tests
 
-To successfully execute Janssen integration tests, you need a Janssen server up and running. So make sure you have followed [Janssen workspace setup guide](https://gist.github.com/ossdhaval/c0c82e437dcb5d5403f241e81908ec4c) and you are able to start Janssen server from your workspace. Now that you have a Janssen instance running on your local machine, you can run tests against it after following steps below.
+This guide will help you configure your Janssen workspace to run unit and integration tests. 
+
+To successfully execute Janssen integration tests, you need a Janssen server up and running. Make sure you have followed [Janssen workspace setup guide](setup-developer-workspace.md) and you can start Janssen server from your workspace. 
 
 - [Update Java CA Certificates](#update-java-ca-certificates)
 - [Setup Test Profiles](#setup-test-profiles)
 
+For the purpose of this guide, we will refer to local workspace code location as `auth-server-code-dir` and the host on which the Janssen server is running will be refered to as `test.local.jans.io`.
+
 ## Update Java CA Certificates 
 
-We will refer to local workspace location as `auth-server-code-dir` and the host on which the Janssen server is running will be refered to as `test.local.jans.io`
+Certificates are required in order to run some of the integration tests, for example, tests in `client` module.
 
-This step is required in order to run tests from `client` module
-
-  - extract certificate 
+- extract certificate 
   
-    ```
-    openssl s_client -connect test.local.jans.io:8443 2>&1 |sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/httpd.crt
-    ```
-    this command takes few seconds to return.
+  ```
+  openssl s_client -connect test.local.jans.io:8443 2>&1 |sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/httpd.crt
+  ```
+  Note: This command takes few seconds to return.
   
-  - Update cacerts of your JRE using command below. We are assuming the JRE being used is Amazon Corretto and it is installed at default path `/usr/lib/jvm/java-11-amazon-corretto`. This command will prompt for cert store password. By default it is `changeit`.
+- Update cacerts of your JRE using command below. We are assuming the JRE being used is Amazon Corretto and it is installed at default path `/usr/lib/jvm/java-11-amazon-corretto`. This command will prompt for cert store password. Unless password has been changed, by default it is `changeit`.
   
-    ```
-    sudo keytool -import -alias jetty -keystore /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts -file /tmp/httpd.crt
-    ``` 
+  ```
+  sudo keytool -import -alias jetty -keystore /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts -file /tmp/httpd.crt
+  ``` 
 
 ## Setup Test Profiles
 
-To setup tests, we need to give our local workspace all the essential information about target Janssen server. This is configured in form of `profile`. Steps below will help us create profile in our local code workspace. 
+In this step we will give all the essential information about target Janssen server to our local workspace . This is configured in form of `profile`. Steps below will help us create a profile in our local code workspace. 
 
 ### Profile for client module
 - Under `<auth-server-code-dir>/client/profiles/` create directory named `test.local.jans.io`
 - copy contents of `default` profile to new profile directory 
-- Customize the values as per your setup:
+- Update following values as per local setup:
   - In file `config-oxauth-test-data.properties` update values of properties below as shown and leave other properties unchanged.
-  ```
-  test.server.name=test.local.jans.io:8443
-  swd.resource=acct:test_user@test.local.jans.io:8443
-  clientKeyStoreFile=profiles/test.local.jans.io/client_keystore.jks
-  clientKeyStoreSecret=secret
-  ```
+    ```
+    test.server.name=test.local.jans.io:8443
+    swd.resource=acct:test_user@test.local.jans.io:8443
+    clientKeyStoreFile=profiles/test.local.jans.io/client_keystore.jks
+    clientKeyStoreSecret=secret
+    ```
+
+- Edit Java files 
+  
+  > TODO: this is a hack because we have `jans-auth` as web app context. In actual setup, there is no such context. So, in this setup, we need to have URLs with `jans-auth`. For now we are hard-coding in the code. Ideally, these steps should not be needed.
+  
+   - Edit `client/src/test/java/io/jans/as/client/BaseTest.java` where url `/.well-known/openid-configuration` is noted and add `jans-auth` to it so that it becomes `"/jans-auth/.well-known/openid-configuration"`
+   - Similarly edit `client/src/main/java/io/jans/as/client/OpenIdConnectDiscoveryClient.java` file where URL `"/.well-known/webfinger"` is mentioned and make it `"/jans-auth/.well-known/webfinger"`
+
 
 ### Profile for server module
 - Under `<auth-server-code-dir>/server/profiles/` create directory named `test.local.jans.io`
 - copy contents of `default` profile to new profile directory 
-- Edit config-oxauth.properties
+- Edit `config-oxauth.properties`
   - Update values of properties as below:
+  
     ```
     server.name=test.local.jans.io:8443
     config.jans-auth.issuer=https://test.local.jans.io:8443
     config.jans-auth.contextPath=https://test.local.jans.io:8443/jans-auth
     ```
-    TODO: values of these properties should not be just server name in a dev setup, it should contain port number as well. Also for property config.jans-auth.contextPath, it should have /jans-auth after server and port as context
-    ```
-  - comment out the properties for LDAP
-- Edit config-oxauth-test.properties
+    
+    > TODO: values of these properties should not be just server name in a dev setup, it should contain port number as well. Also for property config.jans-auth.contextPath, it should have /jans-auth after server and port as context
+    
+  - If you are using MySql as Janssen server backend, then comment out the properties for LDAP
+ 
+- Edit `config-oxauth-test.properties`
   - Add or update values of properties as below:
     ```
     server.name=test.local.jans.io:8443
@@ -90,12 +103,6 @@ To setup tests, we need to give our local workspace all the essential informatio
    ```
    mvn -Dcfg=test.dd.jans.io -fae -Dcvss-score=9 -Dfindbugs.skip=true -Dlog4j.default.log.level=TRACE -Ddependency.check=false clean test
    ```
-- Edit Java files 
-  ```
-  TODO: this is a hack because we have `jans-auth` as web app context. In actual setup, there is no such context. So, in this setup, we need to have URLs with `jans-auth`. For now we are hard-coding in the code. Ideally, these steps should not be needed.
-  ```
-   - Edit `client/src/test/java/io/jans/as/client/BaseTest.java` where url `/.well-known/openid-configuration` is noted and add `jans-auth` to it so that it becomes `"/jans-auth/.well-known/openid-configuration"`
-   - Similarly edit `client/src/main/java/io/jans/as/client/OpenIdConnectDiscoveryClient.java` file where URL `"/.well-known/webfinger"` is mentioned and make it `"/jans-auth/.well-known/webfinger"`
 
 
 ## Steps:
