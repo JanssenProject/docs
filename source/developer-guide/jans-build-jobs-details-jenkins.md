@@ -7,7 +7,7 @@ Document capture sufficient details required to build new CI-CD infrastructure u
 ### Important build jobs
 
 #### FullRebuild
-
+- [Link](https://jenkins.jans.io/jenkins/job/FullRebuild/)
 - Purpose
   - This pipeline builds, deploys and tests all module of Jans server. First this pipeline builds modules(without tests) using respective jobs in this order: 'jans-bom','jans-core','jans-orm','jans-notify','jans-eleven','jans-fido2','jans-auth-server','jans-scim','jans-client-api,'jans-config-api'.|
 - Input Params
@@ -31,17 +31,70 @@ Document capture sufficient details required to build new CI-CD infrastructure u
 - Post build action
   - RocketChat notifications for success, unstable and failure
 
-
-
-
+#### DeployServer
+- [Link](https://jenkins.jans.io/jenkins/job/DeployServer/)
 - Purpose
+  - This job is used to install Janssen server on an LxC container hosted on a remote server. Installed Janssen server is then used to run integration tests.
 - Input Params
+  - SERVER_NAME: jenkins-dev1.jans.io
+  - CONTAINER_NAME: ubuntu20-ldap
+  - PERSISTENCE_DB: ldap
+  - VERSION_NAME: master
+  - DIST_SERVER_BASE: https://maven.jans.io/maven
 - Artifacts
+  - None
 - Frequency
+  - Not scheduled but invoked by other jobs like fullrebuild
 - Test cases
+  - None
 - Deployments
+  - Deploys Janssen server on $SERVER_NAME
 - Related GH workflow
+  - None
 - Post build action
+  - None
+
+#### jans-auth-server
+- [Link](https://jenkins.jans.io/jenkins/job/jans-auth-server/)
+- Purpose
+  - Builds, test and deploy `jans-auth-server` module
+- Input Params
+  - VERSION_NAME: master
+  - PROFILE_NAME: jenkins-dev1.jans.io
+  - MAVEN_SKIP_TESTS: false
+  - DEVELOPMENT_BUILD: false
+  - DEPLOY_BUILD: false
+  - CVSS_SCORE: 9
+  - SKIP_FINDBUGS: true
+  - DEPENDENCY_CHECK: false
+  - TEST_CONF_IN_HOST: false
+  - CONTAINER_NAME: ubuntu20-ldap
+- Artifacts
+  - jans-auth-model-1.0.0-SNAPSHOT.jar, jans-auth-model-1.0.0-SNAPSHOT.pom
+  - jans-auth-persistence-model-1.0.0-SNAPSHOT.jar, jans-auth-persistence-model-1.0.0-SNAPSHOT.pom
+  - jans-auth-client-1.0.0-SNAPSHOT.jar, jans-auth-client-1.0.0-SNAPSHOT.pom
+  - jans-auth-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar, 
+  - jans-auth-static-1.0.0-SNAPSHOT.jar, jans-auth-static-1.0.0-SNAPSHOT.pom
+  - jans-auth-common-1.0.0-SNAPSHOT.jar,jans-auth-common-1.0.0-SNAPSHOT.pom
+  - jans-auth-server-1.0.0-SNAPSHOT.war, jans-auth-server-1.0.0-SNAPSHOT.pom
+  - jans-auth-server-1.0.0-SNAPSHOT.jar
+- Frequency
+  - Not scheduled but invoked by other jobs like fullrebuild
+- Test cases
+  - runs tests against existing server: jenkins-dev1.jans.io
+- Deployments
+  - Deploys Janssen server on $SERVER_NAME
+- Related GH workflow
+  - None
+- Post build action
+  - publish javadocs
+  - publish OWASP report
+  - publish testNG xml report
+
+
+
+
+
 
 
 |Job Name|Purpose|Input params|Artifacts|Frequency|Test cases|Deployments?|Related GH workflow|Post build action|
