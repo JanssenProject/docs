@@ -7,10 +7,11 @@ Document capture sufficient details required to build new CI-CD infrastructure u
 ### Important build jobs
 
 
-|Job Name|Purpose|Frequency|Build Params|Test cases|Deployment|
-| --- | --- | --- | --- | --- | --- |
-|DeployOpenBankingServer|
-|DeployServer|
+|Job Name|Purpose|Frequency|Build triggers|Test cases|Deployments?|Related GH workflow|Post build action|
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|jans-config-api|Module build|Not scheduled|On snapshot dependency update (checks every 1 minute). On SCM update (checks every 1 minute) |jenkins-dev1.jans.io|Does not deploy|triggers `docker-jans-config-api`|Generates Cucumber HTML reports|
+|DeployOpenBankingServer|5 mo
+|DeployServer|14
 |DeployServerIntoHost|
 |DeployWar|
 |FullRebuild|
@@ -23,7 +24,6 @@ Document capture sufficient details required to build new CI-CD infrastructure u
 |jans-auth-server-spanner|
 |jans-bom|
 |jans-client-api|
-|jans-config-api|
 |jans-config-api-bkp|
 |jans-config-api-cb|
 |jans-config-api-ldap|
