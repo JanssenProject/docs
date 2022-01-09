@@ -4,9 +4,9 @@ This document details current Janssen builds configured on [Jenkins](https://jen
 Document capture sufficient details required to build new CI-CD infrastructure using Github Actions.
 
 
-### Important build jobs
+## Important build jobs
 
-#### FullRebuild
+### FullRebuild
 - [Link](https://jenkins.jans.io/jenkins/job/FullRebuild/)
 - Purpose
   - This pipeline builds, deploys and tests all module of Jans server. First this pipeline builds modules(without tests) using respective jobs in this order: 'jans-bom','jans-core','jans-orm','jans-notify','jans-eleven','jans-fido2','jans-auth-server','jans-scim','jans-client-api,'jans-config-api'.|
@@ -31,7 +31,7 @@ Document capture sufficient details required to build new CI-CD infrastructure u
 - Post build action
   - RocketChat notifications for success, unstable and failure
 
-#### DeployServer
+### DeployServer
 - [Link](https://jenkins.jans.io/jenkins/job/DeployServer/)
 - Purpose
   - This job is used to install Janssen server on an LxC container hosted on a remote server. Installed Janssen server is then used to run integration tests.
@@ -54,7 +54,7 @@ Document capture sufficient details required to build new CI-CD infrastructure u
 - Post build action
   - None
 
-#### jans-auth-server
+### jans-auth-server
 - [Link](https://jenkins.jans.io/jenkins/job/jans-auth-server/)
 - Purpose
   - Builds, test and deploy `jans-auth-server` module
@@ -80,6 +80,8 @@ Document capture sufficient details required to build new CI-CD infrastructure u
   - jans-auth-server-1.0.0-SNAPSHOT.jar
 - Frequency
   - Not scheduled but invoked by other jobs like fullrebuild
+  - triggers on SCM change
+  - triggers on maven dependency change
 - Test cases
   - runs tests against existing server: jenkins-dev1.jans.io
 - Deployments
@@ -91,3 +93,74 @@ Document capture sufficient details required to build new CI-CD infrastructure u
   - publish OWASP report
   - publish testNG xml report
 
+### jans-config-api
+
+- [Link](https://jenkins.jans.io/jenkins/job/jans-config-api/)
+- Purpose
+  - Builds and test `jans-config-api` module
+- Input Params
+  - VERSION_NAME: master
+  - PROFILE_NAME: jenkins-dev1.jans.io
+  - MAVEN_SKIP_TESTS: false
+  - DEVELOPMENT_BUILD: false
+  - TEST_CONF_IN_HOST: false
+  - CONTAINER_NAME: ubuntu20-ldap
+- Artifacts
+  - jans-config-api-parent-1.0.0-SNAPSHOT.pom
+  - jans-config-api-common-1.0.0-SNAPSHOT.jar, jans-config-api-common-1.0.0-SNAPSHOT.pom
+  - jans-config-api-server-1.0.0-SNAPSHOT.war, jans-config-api-server-1.0.0-SNAPSHOT.pom
+  - jans-config-api-server-1.0.0-SNAPSHOT-tests.jar
+  - jans-config-api-server-1.0.0-SNAPSHOT.jar
+  - plugins-1.0.0-SNAPSHOT.pom
+  - admin-ui-plugin-1.0.0-SNAPSHOT.jar, admin-ui-plugin-1.0.0-SNAPSHOT.pom
+  - admin-ui-plugin-1.0.0-SNAPSHOT-distribution.jar
+  - jans-config-api-shared-1.0.0-SNAPSHOT.pom
+  - scim-plugin-1.0.0-SNAPSHOT.jar, scim-plugin-1.0.0-SNAPSHOT.pom
+  - scim-plugin-1.0.0-SNAPSHOT-distribution.jar
+- Frequency
+  - Not scheduled but invoked by other jobs like fullrebuild
+  - triggers on SCM change
+  - triggers on maven dependency change
+- Test cases
+  - runs tests against existing server: jenkins-dev1.jans.io
+- Deployments
+  - doesn't deploy
+- Related GH workflow
+  - https://api.github.com/repos/JanssenProject/jans-cloud-native/actions/workflows/15443035
+- Post build action
+  - publish javadocs
+  - publish OWASP report
+  - publish testNG xml report
+
+### jans-scim
+
+- [Link](https://jenkins.jans.io/jenkins/job/jans-scim/)
+- Purpose
+  - Builds and test `jans-scim` module
+- Input Params
+  - VERSION_NAME: master
+  - PROFILE_NAME: jenkins-dev1.jans.io
+  - MAVEN_SKIP_TESTS: false
+  - DEVELOPMENT_BUILD: false
+  - TEST_CONF_IN_HOST: false
+  - CONTAINER_NAME: ubuntu20-ldap
+- Artifacts
+  - jans-scim-1.0.0-SNAPSHOT.pom
+  - jans-scim-model-1.0.0-SNAPSHOT.jar, jans-scim-model-1.0.0-SNAPSHOT.pom
+  - jans-scim-client-1.0.0-SNAPSHOT.jar, jans-scim-client-1.0.0-SNAPSHOT.pom
+  - jans-scim-service-1.0.0-SNAPSHOT.jar, jans-scim-service-1.0.0-SNAPSHOT.pom
+  - jans-scim-server-1.0.0-SNAPSHOT.war, jans-scim-server-1.0.0-SNAPSHOT.pom
+- Frequency
+  - Not scheduled but invoked by other jobs like fullrebuild
+  - triggers on SCM change
+  - triggers on maven dependency change
+- Test cases
+  - runs tests against existing server: jenkins-dev1.jans.io
+- Deployments
+  - doesn't deploy
+- Related GH workflow
+  - https://api.github.com/repos/JanssenProject/jans-cloud-native/actions/workflows/15443035
+- Post build action
+  - publish javadocs
+  - publish findbugs report
+  - publish testNG xml report
