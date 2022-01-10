@@ -217,3 +217,83 @@ Document capture sufficient details required to build new CI-CD infrastructure u
   - https://api.github.com/repos/JanssenProject/jans-cloud-native/actions/workflows/15443035
 - Post build action
   - publish testNG xml report
+
+
+### jans-core
+
+- [Link](https://jenkins.jans.io/jenkins/job/jans-core/)
+- Purpose
+  - Builds and test `jans-core` module
+- Input Params
+  - VERSION_NAME: master
+  - MAVEN_SKIP_TESTS: false
+- Artifacts
+  - Produces 17 jar files as a result of maven build
+- Frequency
+  - Not scheduled but invoked by other jobs like fullrebuild
+  - triggers on SCM change
+  - triggers on maven dependency change
+- Test cases
+  - only few unit tests exist. Not needed to run against a server.
+- Deployments
+  - doesn't deploy
+- Related GH workflow
+  - none
+- Post build action
+  - publish testNG xml report
+
+
+### jans-fido2
+
+- [Link](https://jenkins.jans.io/jenkins/job/jans-fido2/)
+- Purpose
+  - Builds and test `jans-fido2` module
+- Input Params
+  - VERSION_NAME: master
+  - PROFILE_NAME: default
+  - MAVEN_SKIP_TESTS: false
+  - DEVELOPMENT_BUILD: false
+- Artifacts
+  - jans-fido2-parent-1.0.0-SNAPSHOT.pom
+  - jans-fido2-model-1.0.0-SNAPSHOT.jar, jans-fido2-model-1.0.0-SNAPSHOT.pom
+  - jans-fido2-client-1.0.0-SNAPSHOT.jar, jans-fido2-client-1.0.0-SNAPSHOT.pom
+  - jans-fido2-server-1.0.0-SNAPSHOT.war, jans-fido2-server-1.0.0-SNAPSHOT.pom
+- Frequency
+  - Not scheduled but invoked by other jobs like fullrebuild
+  - triggers on SCM change
+  - triggers on maven dependency change
+- Test cases
+  - No tests available.
+- Deployments
+  - doesn't deploy
+- Related GH workflow
+  - https://api.github.com/repos/JanssenProject/jans-cloud-native/actions/workflows/15443035
+- Post build action
+  - publish testNG xml report
+
+### jans-notify
+
+- [Link](https://jenkins.jans.io/jenkins/job/jans-notify/)
+- Purpose
+  - Builds and test `jans-notify`` module
+- Input Params
+  - VERSION_NAME: master
+  - MAVEN_SKIP_TESTS: false
+- Artifacts
+  - jans-notify-parent-1.0.0-SNAPSHOT.pom
+  - jans-notify-model-1.0.0-SNAPSHOT.jar, jans-notify-model-1.0.0-SNAPSHOT.pom
+  - jans-notify-client-1.0.0-SNAPSHOT.jar, jans-notify-client-1.0.0-SNAPSHOT.pom
+  - jans-notify-client2-1.0.0-SNAPSHOT.jar, jans-notify-client2-1.0.0-SNAPSHOT.pom
+  - jans-notify-server-1.0.0-SNAPSHOT.war, jans-notify-server-1.0.0-SNAPSHOT.pom
+- Frequency
+  - Not scheduled but invoked by other jobs like fullrebuild
+  - triggers on SCM change
+  - triggers on maven dependency change
+- Test cases
+  - No tests available.
+- Deployments
+  - doesn't deploy
+- Related GH workflow
+  - none
+- Post build action
+  - publish testNG xml report
