@@ -297,3 +297,66 @@ Document capture sufficient details required to build new CI-CD infrastructure u
   - none
 - Post build action
   - publish testNG xml report
+
+
+### jans-orm
+
+- [Link](https://jenkins.jans.io/jenkins/job/jans-orm/)
+- Purpose
+  - Builds and test `jans-orm` module
+- Input Params
+  - VERSION_NAME: master
+  - MAVEN_SKIP_TESTS: false
+- Artifacts
+  - produces 16 jar files via maven build
+- Frequency
+  - Not scheduled but invoked by other jobs like fullrebuild
+  - triggers on SCM change
+  - triggers on maven dependency change
+- Test cases
+  - Tests are standalone. Not required to run against Jans server
+- Deployments
+  - doesn't deploy
+- Related GH workflow
+  - none
+- Post build action
+  - publish testNG xml report
+
+
+### jans-eleven
+
+- [Link](https://jenkins.jans.io/jenkins/job/jans-eleven/)
+- Purpose
+  - Builds and test `jans-orm` module
+- Input Params
+  - VERSION_NAME: master
+  - PROFILE_NAME: jenkins-dev1.jans.io
+- Artifacts
+  - jans-eleven-parent-1.0.0-SNAPSHOT.pom
+  - jans-eleven-model-1.0.0-SNAPSHOT.jar, jans-eleven-model-1.0.0-SNAPSHOT.pom
+  - jans-eleven-server-1.0.0-SNAPSHOT.war, jans-eleven-server-1.0.0-SNAPSHOT.pom
+  - jans-eleven-client-1.0.0-SNAPSHOT.jar, jans-eleven-client-1.0.0-SNAPSHOT.pom
+- Frequency
+  - Not scheduled but invoked by other jobs like fullrebuild
+  - triggers on SCM change
+  - triggers on maven dependency change
+- Test cases
+  - Build on Janssen with test execution fails
+- Deployments
+  - doesn't deploy
+- Related GH workflow
+  - none
+- Post build action
+  - publish testNG xml report
+
+
+### StartServerContainer
+Starts named lxc container on given target server
+
+### inactive jobs
+- DeployOpenBankingServer
+- DeployServerIntoHost
+- DeployWar
+- jans-config-api_bkp
+- jans-auth-server-extending_crypto_support
+- jans-auth-server-issue_142
