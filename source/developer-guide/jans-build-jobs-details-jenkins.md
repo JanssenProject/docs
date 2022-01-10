@@ -164,3 +164,56 @@ Document capture sufficient details required to build new CI-CD infrastructure u
   - publish javadocs
   - publish findbugs report
   - publish testNG xml report
+
+
+### jans-client-api
+
+- [Link](https://jenkins.jans.io/jenkins/job/jans-client-api/)
+- Purpose
+  - Builds and test `jans-client-api` module
+- Input Params
+  - VERSION_NAME: master
+  - PROFILE_NAME: default
+  - MAVEN_SKIP_TESTS: false
+  - CLIENT_API_CONF: /home/tomcat/.jenkins/jobs/oxD_4.2/workspace/oxd-server/src/test/resources/oxd-conf-test.json
+  - SERVER_PROFILE: jenkins-dev1.jans.io
+- Artifacts
+  - jans-client-api-parent-1.0.0-SNAPSHOT.pom
+  - uma-rs-core-1.0.0-SNAPSHOT.jar
+  - uma-rs-core-1.0.0-SNAPSHOT.pom
+  - uma-rs-core-1.0.0-SNAPSHOT-sources.jar
+  - uma-rs-core-1.0.0-SNAPSHOT-tests.jar
+  - uma-rs-resteasy-1.0.0-SNAPSHOT.jar
+  - uma-rs-resteasy-1.0.0-SNAPSHOT.pom
+  - uma-rs-resteasy-1.0.0-SNAPSHOT-tests.jar
+  - uma-rs-resteasy-1.0.0-SNAPSHOT-sources.jar
+  - jans-client-api-common-1.0.0-SNAPSHOT.jar
+  - jans-client-api-common-1.0.0-SNAPSHOT.pom
+  - jans-client-api-common-1.0.0-SNAPSHOT-tests.jar
+  - jans-client-api-common-1.0.0-SNAPSHOT-sources.jar
+  - jans-client-api-1.0.0-SNAPSHOT.jar
+  - jans-client-api-1.0.0-SNAPSHOT.pom
+  - jans-client-api-1.0.0-SNAPSHOT-tests.jar
+  - jans-client-api-1.0.0-SNAPSHOT-sources.jar
+  - jans-client-api-gen-1.0.0-SNAPSHOT.jar
+  - jans-client-api-gen-1.0.0-SNAPSHOT.pom
+  - jans-client-api-gen-1.0.0-SNAPSHOT-tests.jar
+  - jans-client-api-gen-1.0.0-SNAPSHOT-javadoc.jar
+  - jans-client-api-gen-1.0.0-SNAPSHOT-sources.jar
+  - jans-client-api-server-1.0.0-SNAPSHOT.jar
+  - jans-client-api-server-1.0.0-SNAPSHOT.pom
+  - jans-client-api-server-1.0.0-SNAPSHOT-tests.jar
+  - jans-client-api-server-1.0.0-SNAPSHOT-sources.jar
+  - jans-client-api-server-1.0.0-SNAPSHOT-distribution.zip
+- Frequency
+  - Not scheduled but invoked by other jobs like fullrebuild
+  - triggers on SCM change
+  - triggers on maven dependency change
+- Test cases
+  - runs tests against existing server: jenkins-dev1.jans.io. But target server is not defined by server profile as in other projects but it is configured using `test/test.properties`
+- Deployments
+  - doesn't deploy
+- Related GH workflow
+  - https://api.github.com/repos/JanssenProject/jans-cloud-native/actions/workflows/15443035
+- Post build action
+  - publish testNG xml report
